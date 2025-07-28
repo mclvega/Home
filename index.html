@@ -1,115 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Jugadores Draft</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    input[type="text"] {
-      width: 300px;
-      padding: 8px;
-      margin-bottom: 20px;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      padding: 6px 0;
-    }
-    .count {
-      font-weight: bold;
-    }
-    .multiple {
-      color: red;
-    }
-  </style>
-</head>
-<body>
-  <h1>Jugadores Draft</h1>
-  <input type="text" id="search" placeholder="Buscar jugador..." onkeyup="filterList()" />
-  <ul id="playerList"></ul>
+<div class="container mt-5">
+  <div id="icon-grid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-4 justify-content-center">
+    <!-- Íconos cargados desde JSON -->
+  </div>
+</div>
 
-  <script>
-const rawMessages = `
-  Khan,Cáceres,Platini,Inzaghi
-  Seaman,maldini,davids,son
-  Abbiati,Cannavaro,Messi,Suarez
-  schmeichel,Rijkaard,Messi,suarez 
-  schmeichel,van Dijk,vieira,bale
-  Courtois,Araújo,Gullit,Bale
-  donnaruma,cannavaro,pedri,forlan 
-  Cech,Thuram,Gilberto Silva,Rummenigge
-  Lloris,van buyten,davids,van basten
-  Diogo Costa,Van Buyten,Rijkaard,Forlán
-  Marquinhos,Kanté,Neymar 
-  Hakimi,cantona,Tony adams,neymar,beckembauer,costacurta 
-  Bellingham Jude,Lilian Thuram
-  pique,jude Bellingham,alexander arnold
-  Araujo,pedri,rummenigue
-  Van Dijk,Maradona,Shewa
-  Bastoni,Tchouameni,Owen
-  Tony Adams,Dumfries,kante
-  Stefano Fiore,Owen,koundr,Puskas,Romario,batistuta,Cubarsi,Belleti,Ronaldinho,saliba,pique,oshimen
-`;
+<script>
+  async function cargarIconos() {
+    const response = await fetch('icons.json');
+    const icons = await response.json();
 
-
-    const playerCounts = {};
-
-    rawMessages.split('\n').forEach(line => {
-      line.split(',').forEach(name => {
-        name = name.trim();
-        if (!name) return;
-        const normalized = name
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, ""); // elimina tildes
-        playerCounts[normalized] = (playerCounts[normalized] || 0) + 1;
-      });
+    const container = document.getElementById('icon-grid');
+    icons.forEach(icon => {
+      const col = document.createElement('div');
+      col.className = 'col text-center';
+      col.innerHTML = `
+        <a href="${icon.url}" target="_blank" title="${icon.name}">
+          <img src="${icon.img}" alt="${icon.name}" class="icon-img rounded">
+          <div class="text-white mt-2">${icon.name}</div>
+        </a>
+      `;
+      container.appendChild(col);
     });
+  }
 
-    const displayNames = {
-      "schmeichel": "Schmeichel", "khan": "Khan", "seaman": "Seaman", "abbiati": "Abbiati",
-      "cech": "Cech", "courtois": "Courtois", "donnaruma": "Donnarumma", "lloris": "Lloris",
-      "diogo costa": "Diogo Costa", "caceres": "Cáceres", "platini": "Platini", "inzaghi": "Inzaghi",
-      "maldini": "Maldini", "davids": "Davids", "son": "Son", "cannavaro": "Cannavaro",
-      "messi": "Messi", "suarez": "Suárez", "rijkaard": "Rijkaard", "raijard": "Rijkaard",
-      "vieira": "Vieira", "gulit": "Gullit", "gullit": "Gullit", "vandijk": "Van Dijk", "van dijk": "Van Dijk",
-      "bale": "Bale", "araujo": "Araújo", "pedri": "Pedri", "forlan": "Forlán", "forlán": "Forlán",
-      "thuram": "Thuram", "gilberto silva": "Gilberto Silva", "rummenigge": "Rummenigge",
-      "van buyten": "Van Buyten", "van basten": "Van Basten", "marquinhos": "Marquinhos",
-      "kante": "Kanté", "neymar": "Neymar", "hakimi": "Hakimi", "cantona": "Cantona",
-      "tony adams": "Tony Adams", "beckembauer": "Beckenbauer", "costacurta": "Costacurta",
-      "bellingham jude": "Bellingham", "jude bellingham": "Bellingham", "alexander arnold": "Alexander-Arnold",
-      "pique": "Piqué", "rummenigue": "Rummenigge", "maradona": "Maradona", "shewa": "Shevchenko",
-      "bastoni": "Bastoni", "tchouameni": "Tchouaméni", "owen": "Owen", "dumfries": "Dumfries",
-      "stefano fiore": "Stefano Fiore", "koundr": "Koundé", "kounde": "Koundé",
-      "puskas": "Puskás", "romario": "Romário", "batistuta": "Batistuta", "cubarsi": "Cubarsí",
-      "belleti": "Belletti", "ronaldinho": "Ronaldinho", "saliba": "Saliba", "oshimen": "Osimhen"
-    };
-
-    const list = document.getElementById("playerList");
-
-    Object.entries(playerCounts)
-      .sort((a, b) => b[1] - a[1])
-      .forEach(([key, count]) => {
-        if (!key || key.length < 2) return;
-        const display = displayNames[key] || key[0].toUpperCase() + key.slice(1);
-        const li = document.createElement("li");
-        li.innerHTML = `<span class="${count > 1 ? 'multiple' : ''}">${display}</span> <span class="count">(${count})</span>`;
-        list.appendChild(li);
-      });
-
-    function filterList() {
-      const query = document.getElementById("search").value.toLowerCase();
-      const items = document.querySelectorAll("#playerList li");
-      items.forEach(item => {
-        item.style.display = item.textContent.toLowerCase().includes(query) ? "" : "none";
-      });
-    }
-  </script>
-</body>
-</html>
+  cargarIconos();
+</script>
