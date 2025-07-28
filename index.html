@@ -20,45 +20,70 @@
     li {
       padding: 6px 0;
     }
+    .count {
+      color: gray;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <h1>Jugadores Draft</h1>
   <input type="text" id="search" placeholder="Buscar jugador..." onkeyup="filterList()" />
-  <ul id="playerList">
-    <!-- Jugadores insertados aquí -->
-  </ul>
+  <ul id="playerList"></ul>
 
   <script>
-    const players = [
-      "Abbiati","Adams","Alexander Arnold","Araújo","Bale","Bastoni","Bellingham Jude",
-      "Beckembauer","Cannavaro","Cantona","Cáceres","Cech","Courtois","Costacurta",
-      "Davids","Diogo Costa","Donnaruma","Diego","Dumfries","Fiore","Forlán","Gilberto Silva",
-      "Gullit","Hakimi","Inzaghi","Kanté","Khan","Kounde","Lloris","MalDini","Marquinhos","Messi",
-      "McLVega","Neymar","Owen","Pedri","Piqué","Platini","Raijard","Rijkaard","Rummenigge",
-      "Schmeichel","Seaman","Shewa","Son","Stefano Fiore","Suarez","Thuram","Tony Adams",
-      "Tchouameni","Van Baston","Van Buyten","Van Dijk","Vieira"
-    ];
+    const rawMessages = `
+      Khan,Cáceres,Platini,Inzaghi
+      Seaman,maldini,davids,son
+      Abbiati,Cannavaro,Messi,Suarez
+      schmeichel, Rijkaard, Messi y suarez
+      Cech, Raijard, Vieira, Gulit
+      schmeichel, van Dijk, vieira, bale
+      Courtois, Araújo, Gullit, Bale
+      donnaruma, cannavaro, pedri y forlan
+      Cech, Thuram, Gilberto Silva, Rummenigge
+      Lloris , van buyten, davids , van basten
+      Diogo Costa, Van Buyten, Rijkaard y Forlán
+      Marquinhos, Kanté y Neymar
+      Hakimi , cantona , Tony adams
+      Según la lista escogió a neymar, beckembauer y costacurta
+      Vieira, Bellingham Jude, Lilian Thuram
+      pique, jude Bellingham, alexander arnold
+      Araujo, pedri , rummenigue
+      Van Dijk, el Diego y Shewa
+      Bastoni,Tchouameni,Owen
+      Tony Adams,Dumfries, kante
+      Stefano Fiore,Owen,kounde
+    `;
 
-    const listElement = document.getElementById("playerList");
-    const sortedUniquePlayers = [...new Set(players.map(p => p.trim().toLowerCase()))]
-      .map(p => p[0].toUpperCase() + p.slice(1))
-      .sort((a, b) => a.localeCompare(b));
+    const playerCounts = {};
 
-    sortedUniquePlayers.forEach(player => {
-      const li = document.createElement("li");
-      li.textContent = player;
-      listElement.appendChild(li);
+    rawMessages.split('\n').forEach(line => {
+      line.split(/[,\sy]+/).forEach(name => {
+        name = name.trim();
+        if (!name) return;
+        // Normalizar mayúsculas/minúsculas y tildes
+        const normalized = name
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, ""); // Elimina tildes
+        playerCounts[normalized] = (playerCounts[normalized] || 0) + 1;
+      });
     });
 
-    function filterList() {
-      const query = document.getElementById("search").value.toLowerCase();
-      const items = document.querySelectorAll("#playerList li");
-      items.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(query) ? "" : "none";
-      });
-    }
-  </script>
-</body>
-</html>
+    const displayNames = {
+      "schmeichel": "Schmeichel", "khan": "Khan", "seaman": "Seaman", "abbiati": "Abbiati",
+      "cech": "Cech", "courtois": "Courtois", "donnaruma": "Donnarumma", "lloris": "Lloris",
+      "diogo": "Diogo Costa", "caceres": "Cáceres", "platini": "Platini", "inzaghi": "Inzaghi",
+      "maldini": "Maldini", "davids": "Davids", "son": "Son", "cannavaro": "Cannavaro",
+      "messi": "Messi", "suarez": "Suárez", "rijkaard": "Rijkaard", "raijard": "Rijkaard",
+      "vieira": "Vieira", "gullit": "Gullit", "van": "Van Dijk", "bale": "Bale",
+      "araujo": "Araújo", "pedri": "Pedri", "forlan": "Forlán", "thuram": "Thuram",
+      "gilberto": "Gilberto Silva", "rummenigge": "Rummenigge", "buyten": "Van Buyten",
+      "basten": "Van Basten", "marquinhos": "Marquinhos", "kante": "Kanté",
+      "neymar": "Neymar", "hakimi": "Hakimi", "cantona": "Cantona", "adams": "Tony Adams",
+      "beckembauer": "Beckenbauer", "costacurta": "Costacurta", "bellingham": "Bellingham",
+      "pique": "Piqué", "alexander": "Alexander Arnold", "diego": "Diego",
+      "shewa": "Shevchenko", "bastoni": "Bastoni", "tchouameni": "Tchouaméni",
+      "owen": "Owen", "dumfries": "Dumfries", "fiore": "Stefano Fiore", "kounde": "Koundé"
+    };
