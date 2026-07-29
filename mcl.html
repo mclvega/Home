@@ -1,384 +1,221 @@
-<!doctype html>
-<html>
-
+<!DOCTYPE html>
+<html lang="es">
 <head>
-	<title>MCL</title>
-	<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego de Salto Vertical</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1a1a1a;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
 
-body{
-	background:black;
-	color:white;
-	margin:2px;
-	padding:2px;;
-}
-.titulo{
-	font-size:100px;
-	margin-left:44%;
-}
-hr{
-	width:100%;
-}
-label{
-	color:white;
-	margin-left:35px;
-}
-ul{
-	
-	color:red;
-}
-.pagina{
-	width:150px;
-	display:inline-block;
-}
-a{
-	color:white;
-}
-#imagen{
-	background:black;
-	margin:30px 500px;
-	padding:10px;
-	border:8px solid white;
-}
-li{
-	margin-top:50px;
-	margin-left:40px;
-}
-h2{
-	margin-left:500px;
-}
-	</style>
-	<link rel="shortcut icon" type="image/x-icon" href="https://img2.freepng.es/20180330/dsw/kisspng-minus-militia-overdose-militant-mayhem-mix-cut-m-m-5abed97b1caa08.5698226615224569551174.jpg">
+    h1 {
+      margin-bottom: 10px;
+    }
 
+    #game-container {
+      position: relative;
+    }
+
+    canvas {
+      border: 3px solid #fff;
+      border-radius: 8px;
+      background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+
+   .instructions {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+  </style>
 </head>
-
 <body>
-	<header>
-		<label class="titulo">McL</label>
-		<label id="hora" style=" text-align: end;  padding-right: 30px; display: inline-block; font-size: 40px; margin-left: 100px; text-align: end;">
 
-			<script>
+  <h1>¡Juego de Salto!</h1>
+  <div id="game-container">
+    <canvas id="canvas" width="600" height="300"></canvas>
+  </div>
+  <p class="instructions">Presiona <strong>ESPACIO</strong> o **Haz Clic** para saltar.</p>
 
-			mostrarHora();
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-			function mostrarHora()
-			{
+    const GRAVEDAD = 0.6;
+    let puntaje = 0;
+    let mejorPuntaje = 0;
+    let juegoTerminado = false;
+    let fotogramas = 0;
 
-				
-			var hora=new Date().getHours(); 
-			var minutos =new Date().getMinutes();
-			if(hora<=9) {
+    const jugador = {
+      x: 50,
+      y: 200,
+      ancho: 30,
+      alto: 40,
+      velocidadY: 0,
+      fuerzaSalto: -12,
+      enSuelo: false,
+      color: '#FF5722',
 
-				hora="0"+hora;
+      dibujar() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.ancho, this.alto);
+        ctx.fillStyle = '#FFF';
+        ctx.fillRect(this.x + 20, this.y + 8, 6, 6);
+      },
 
-			}
-			 if(minutos<=9){
+      actualizar() {
+        this.velocidadY += GRAVEDAD;
+        this.y += this.velocidadY;
 
-				
-				minutos="0"+minutos;
+        if (this.y + this.alto >= 250) {
+          this.y = 250 - this.alto;
+          this.velocidadY = 0;
+          this.enSuelo = true;
+        } else {
+          this.enSuelo = false;
+        }
+      },
 
-			}
-			document.getElementById("hora").innerHTML=hora+":"+minutos;
-			
+      saltar() {
+        if (this.enSuelo &&!juegoTerminado) {
+          this.velocidadY = this.fuerzaSalto;
+        }
+      }
+    };
 
-			 
-			
-			setTimeout(() => {
-				mostrarHora();
-			}, 1000); 
-			}</script>
-		
+    const obstaculos = [];
+    class Obstaculo {
+      constructor() {
+        this.x = canvas.width;
+        this.ancho = 20 + Math.random() * 15;
+        this.alto = 30 + Math.random() * 25;
+        this.y = 250 - this.alto;
+        this.velocidad = 5 + Math.floor(puntaje / 10);
+        this.color = '#5D4037'; // <- Corregido
+      }
 
-		</label>
-		<nav>
-					<ul>
-						<br>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Facebook" href="https://www.facebook.com/"><img width="100"
-									src="http://pngimg.com/uploads/facebook_logos/facebook_logos_PNG19750.png"
-									alt="Facebook" /></a>
-							<br>
-							<label>Facebook</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Youtube" href="https://www.youtube.com/"><img width="100"
-									src="http://www.freepngimg.com/thumb/youtube/4-2-youtube-png-pic-thumb.png"
-									alt="Yotube" /></a>
-							<br>
-							<label>Youtube</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Instagram" href="https://www.instagram.com/"><img width="100"
-									src="https://www.seeklogo.net/wp-content/uploads/2016/06/Instagram-logo.png"
-									alt="Instagram" /></a>
-							<br>
-							<label>Instagram</label>
+      dibujar() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.ancho, this.alto);
+      }
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="WhatsApp" href="https://web.whatsapp.com/"><img width="100"
-									src="http://www.stickpng.com/assets/images/580b57fcd9996e24bc43c543.png"
-									alt="WhatsApp" /></a>
-							<br>
-							<label>WhatsApp</label>
+      actualizar() {
+        this.x -= this.velocidad;
+      }
+    }
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Twitter" href="https://twitter.com/"><img width="100"
-									src="http://www.pngmart.com/files/5/Twitter-PNG-Free-Download.png"
-									alt="Twitter" /></a>
-							<br>
-							<label>Twitter</label>
+    function dibujarSuelo() {
+      ctx.fillStyle = '#4CAF50';
+      ctx.fillRect(0, 250, canvas.width, 50);
+      ctx.fillStyle = '#388E3C';
+      ctx.fillRect(0, 250, canvas.width, 5);
+    }
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Gmail" href="https://mail.google.com/mail/u/0/#inbox"><img
-									width="100" src="http://www.freeiconspng.com/uploads/gmail-icon-25.png"
-									alt="Gmail" /></a>
-							<br>
-							<label>Gmail</label>
+    function verificarColisiones() {
+      obstaculos.forEach(obs => {
+        if (
+          jugador.x < obs.x + obs.ancho &&
+          jugador.x + jugador.ancho > obs.x &&
+          jugador.y < obs.y + obs.alto &&
+          jugador.y + jugador.alto > obs.y
+        ) {
+          juegoTerminado = true;
+        }
+      });
+    }
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Correo Duoc" href="https://drive.google.com/drive/u/0/my-drive"><img
-									width="100"
-									src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_Drive_logo.png"
-									alt="Correo Duoc" /></a>
-							<br>
-							<label>Drive McL</label>
+    function reiniciarJuego() {
+      jugador.y = 200;
+      jugador.velocidadY = 0;
+      obstaculos.length = 0;
+      if (puntaje > mejorPuntaje) mejorPuntaje = puntaje;
+      puntaje = 0;
+      fotogramas = 0;
+      juegoTerminado = false;
+      buclePrincipal();
+    }
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Google" href="http://www.google.com"><img width="100"
-									src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2000px-Google_%22G%22_Logo.svg.png"
-									alt="Google" /></a>
-							<br>
-							<label>Google</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Booyah" href="https://booyah.live/"><img width="150"
-									src="https://cdnmambet-a.akamaihd.net/booyah/build/pc/static/media/logo_196x90.fe52eab5.png"
-									alt="Booyah" /></a>
-							<br>
-							<label>Booyah</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="DUOC UC" href="https://experienciavivo.duoc.cl/alumnos"><img
-									height=100
-									src="http://1.bp.blogspot.com/-U58XStbCjus/TwDrDf_qlhI/AAAAAAAAAnc/gaXZ6cVWf8M/s1600/Duoc+UC.png"
-									alt="Duoc Uc" /></a>
-							<br>
-							<label>Duoc UC</label>
+    function dibujarUI() {
+      ctx.fillStyle = '#333';
+      ctx.font = '16px sans-serif';
+      ctx.fillText(`Puntos: ${puntaje}`, 15, 30);
+      ctx.fillText(`Record: ${mejorPuntaje}`, 15, 50); // <- Corregido
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Correo Duoc" href="https://mail.google.com/mail/u/1/#inbox"><img
-									width="100"
-									src="http://icons.iconarchive.com/icons/martz90/circle/256/gmail-icon.png"
-									alt="Correo Duoc" /></a>
-							<br>
-							<label>Correo Duoc</label>
+      if (juegoTerminado) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Correo Duoc" href="https://drive.google.com/drive/u/1/my-drive"><img
-									width="100"
-									src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_Drive_logo.png"
-									alt="Correo Duoc" /></a>
-							<br>
-							<label>Drive Duoc</label>
+        ctx.fillStyle = '#FFF';
+        ctx.font = 'bold 30px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('¡JUEGO TERMINADO!', canvas.width / 2, canvas.height / 2 - 10);
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Twitch" href="https://www.twitch.tv/"><img width="130"
-									src="https://cdn.atomix.vg/wp-content/uploads/2018/06/twitch-app-logo-png-3-435313cb-c033-4243-9aa8-4eb26763a223.png"
-									alt="Twitch"></a>
-							<br>
-							<label>Twitch</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Outlook" href="https://outlook.live.com/mail/0/inbox"><img width="100"
-									src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg/1200px-Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg.png"
-									alt="Outlook"></a>
-							<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<label>Outlook</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="AnimeFlv" href="https://animeflv.net/"><img width="100"
-								src="https://i.pinimg.com/originals/57/80/e4/5780e48d1603be85a509bab2bf758256.png"
-									alt="AnimeFlv"></a>
-							<br>
-							<label>Monitos</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Traductor"
-								href="https://translate.google.cl/?hl=es-419&tab=wT&authuser=0"><img width="100"
-									src="https://vignette.wikia.nocookie.net/cartoonnetwork/images/9/94/Icono_de_Google_Traductor.png/revision/latest/scale-to-width-down/480?cb=20140919194855&path-prefix=es"
-									alt="Traductor"></a>
-							<br>
-							<label>Traductor</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Chilesystems" href="https://mail.google.com/mail/u/2/#inbox"><img
-									width="100"
-									src="http://icons.iconarchive.com/icons/martz90/circle/256/gmail-icon.png"
-									alt="Chilesystems" /></a>
-							<br>
-							<label>Chilesystems</label>
+        ctx.font = '16px sans-serif';
+        ctx.fillText('Presiona Espacio o Clic para reiniciar', canvas.width / 2, canvas.height / 2 + 25);
+        ctx.textAlign = 'left';
+      }
+    }
 
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Netflix"
-								href="https://www.netflix.com/browse"><img width="150"
-									src="https://i1.wp.com/elparche.co/wp-content/uploads/2018/05/netflix-n-logo-png.png?ssl=1"
-									alt="Netflix"></a>
-							<br>
-							&nbsp;&nbsp;&nbsp;
-							<label>Netflix</label>
-						</li>
+    function buclePrincipal() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-						<li class="pagina">
-							&nbsp;&nbsp;
-							<a target="_blank" title="Github"
-								href="https://github.com/"><img width="100"
-									src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTVl1FYFsRH7ezNbbP8_KL5GHIbud6s1VhRA&usqp=CAU"
-									alt="Github"></a>
-							<br>
-							<label>Github</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;
-							<a target="_blank" title="Discord"
-								href="https://discord.com/channels/@me"><img width="100"
-									src="https://www.freepnglogos.com/uploads/discord-logo-png/discord-logo-logodownload-download-logotipos-1.png"
-									alt="Discord"></a>
-							<br>
-							<label>Discord</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Banco Estado"
-								href="https://www.bancoestado.cl/imagenes/comun2008/nuevo_paglg_pers2.html"><img
-									height=130
-									src="http://freevectorlogo.net/wp-content/uploads/2012/12/banco-estado-logo-vector.png"
-									alt="Banco Estado"></a>
-							<br>
-							<label>Banco Estado</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Banco de Chile"
-								href="https://login.bancochile.cl/bancochile-web/persona/login/index.html#/login"><img
-									height=100
-									src="https://portales.bancochile.cl/uploads/000/007/580/742d1688-95f6-44bf-aa2f-f947d4657db5/original/Mi_Banco_BCH.svg"
-									alt="Banco de Chile"></a>
-							<br>
-							<label>Banco de Chile</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      dibujarSuelo();
+      jugador.actualizar();
+      jugador.dibujar();
 
-							<a target="_blank" title="Servipag"
-								href="https://www.servipag.com/wps/portal/servipag/home/!ut/p/b1/04_Sj9CPykssy0xPLMnMz0vMAfGjzOLd_YyCvTzNPJyD_fzNDTyNvY3dAkxCjC38zIAKIoEKDHAARwNC-sP1o_ArMYEqwGOFn0d-bqp-QW6EQZaJoyIAZ4d8Fw!!/dl4/d5/L2dBISEvZ0FBIS9nQSEh/"><img
-									height=68 src="https://clientes.webhosting.cl/servipag-logo.png" alt="Servipag"></a>
-							<br>
-							<label>Servipag</label>
-						</li>
+      fotogramas++;
+      if (fotogramas % 90 === 0) {
+        obstaculos.push(new Obstaculo());
+      }
 
-						<li class="pagina">&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Wikipedia"
-								href="https://es.wikipedia.org/wiki/Wikipedia:Portada"><img height="120"
-									src="http://www.userlogos.org/files/logos/sjdvda/Wikipedia2.png"
-									alt="Wikipedia" /></a>
-							<br>
-							<label>Wikipedia</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Mercado Libre" href="https://www.mercadolibre.cl/"><img height=100
-									src="http://www.colppy.com/signup/img/logo_ML-horiz.png" alt="Mercado Libre"></a>
-							<br>
-							<label>Mercado Libre</label>
-						</li>
-						<li class="pagina">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Mega" href="http://www.mega.cl/senal-en-vivo/"><img height="120"
-									src="https://vignette.wikia.nocookie.net/doblaje/images/6/63/Mega.png/revision/latest/scale-to-width-down/489?cb=20160211074941&path-prefix=es"
-									alt="Megavision" /></a>
-							<br>
-							<label>Mega</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="CHV" href="http://www.chilevision.cl/senal-online/"><img
-									width="100"
-									src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Logo_CHV_2015.png/603px-Logo_CHV_2015.png"
-									alt="Chilevision" /></a>
-							<br>&nbsp;&nbsp;&nbsp;
-							<label>CHV</label>
-						</li>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="La Red" href="http://lared.cl/senal-online"><img height=100
-									src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/La_Red.svg/2000px-La_Red.svg.png"
-									alt="La Red"></a>
-							<br>&nbsp;&nbsp;&nbsp;
-							<label>La Red</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="TVN" href="http://www.tvn.cl/envivo/"><img height=135 width="250"
-									src="http://estaticos.tvn.cl/skins/especiales/camiseteados/201607271000/gfx/socios/TVN.png"
-									alt="TVN"></a>
-							<br>&nbsp;&nbsp;&nbsp;&nbsp;
-							<label>TVN</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="24 Horas" href="https://www.24horas.cl/envivo/"><img height=100
-									src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Logotipo_de_24_Horas_TVN.png"
-									alt="24 Horas "></a>
-							<label>24 Horas</label>
-						</li>
-						<li class="pagina">
-							&nbsp;&nbsp;&nbsp;&nbsp;
-							<a target="_blank" title="Canal 13" href="http://www.13.cl/en-vivo"><img height=100 
-									src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Canal13Chile_Vectorial.svg/1200px-Canal13Chile_Vectorial.svg.png"
-									alt="Canal 13"></a>
-							<br> 
-							<label>Canal 13</label>
-							</ul<>
-						</li>
-			</ul>
-		</nav>
-	</header>
-	<br>
-	<div id="abajo">
-		<label id="footer" style="display: block; text-align: center; font-size: 25px;">
+      for (let i = obstaculos.length - 1; i >= 0; i--) {
+        obstaculos[i].actualizar();
+        obstaculos[i].dibujar();
 
-			<script>
-				var year=new Date().getFullYear(); 
-				document.getElementById("footer").innerHTML="Michael Vega - McL.Inc "+year;
-				</script>
-		</label>
-	</div>
+        if (obstaculos[i].x + obstaculos[i].ancho < 0) {
+          obstaculos.splice(i, 1);
+          puntaje++;
+        }
+      }
+
+      verificarColisiones();
+      dibujarUI();
+
+      if (!juegoTerminado) {
+        requestAnimationFrame(buclePrincipal);
+      }
+    }
+
+    function accion() {
+      if (juegoTerminado) {
+        reiniciarJuego();
+      } else {
+        jugador.saltar();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        accion();
+      }
+    });
+
+    canvas.addEventListener('click', accion);
+
+    buclePrincipal();
+  </script>
 </body>
-
 </html>
