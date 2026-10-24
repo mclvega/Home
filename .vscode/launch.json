@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Home: netlify dev (con mantenedor)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "netlify dev --port 4200",
+      "cwd": "${workspaceFolder}",
+      "serverReadyAction": {
+        "pattern": "localhost:(\\d+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternally"
+      }
+    }
+  ]
+}

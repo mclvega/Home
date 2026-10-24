@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#000000">
+  <title>Mantenedor · Home</title>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/m_sharp/512/FFFFFF/home.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --fondo: #000;
+      --borde: #222;
+      --texto: #e6e6e6;
+      --tenue: #666;
+      --peligro: #ff5c5c;
+    }
+
+    body {
+      background: var(--fondo);
+      color: var(--texto);
+      font-weight: 300;
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      letter-spacing: .15em;
+    }
+
+    .etiqueta {
+      font-size: .7rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--tenue);
+    }
+
+    a {
+      color: var(--tenue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--texto);
+    }
+
+    /* Campos: solo una línea inferior */
+    .campo {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--borde);
+      color: var(--texto);
+      padding: .5rem 0;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .campo:focus {
+      border-bottom-color: var(--texto);
+    }
+
+    .campo::placeholder {
+      color: #333;
+    }
+
+    /* Botones de texto, sin relleno */
+    .btn-txt {
+      background: transparent;
+      border: 1px solid var(--borde);
+      color: var(--texto);
+      border-radius: 999px;
+      padding: .35rem 1.1rem;
+      font-size: .85rem;
+      transition: border-color .2s, opacity .2s;
+    }
+
+    .btn-txt:hover {
+      border-color: var(--texto);
+    }
+
+    .btn-txt:disabled {
+      opacity: .25;
+      pointer-events: none;
+    }
+
+    .btn-icono {
+      background: transparent;
+      border: 0;
+      color: var(--tenue);
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      transition: color .2s;
+    }
+
+    .btn-icono:hover {
+      color: var(--texto);
+    }
+
+    .btn-icono.peligro:hover {
+      color: var(--peligro);
+    }
+
+    .panel {
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 1.25rem;
+    }
+
+    .preview {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+    }
+
+    .preview:not([src]) {
+      visibility: hidden;
+    }
+
+    .fila {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .75rem 0;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .fila.activa {
+      opacity: .4;
+    }
+
+    .mini {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .datos {
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .datos small {
+      color: var(--tenue);
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .acciones {
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    #aviso {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 1px solid var(--borde);
+      background: var(--fondo);
+      border-radius: 999px;
+      padding: .5rem 1.25rem;
+      font-size: .85rem;
+      z-index: 10;
+    }
+
+    #aviso.error {
+      border-color: var(--peligro);
+      color: var(--peligro);
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5" style="max-width: 680px">
+    <div class="d-flex align-items-baseline justify-content-between mb-5">
+      <h1 class="m-0">McL</h1>
+      <a href="index.html">← home</a>
+    </div>
+
+    <!-- Acceso con código de mcl-autenticator-code -->
+    <form id="login" class="panel text-center d-none" autocomplete="off">
+      <div class="etiqueta mb-3">Código de acceso</div>
+      <input id="f-codigo" class="campo text-center fs-2 mb-3" inputmode="numeric" pattern="\d{6}" maxlength="6" required placeholder="000000" style="letter-spacing: .4em">
+      <div class="mb-4"><a href="https://mcl-autenticator-code.netlify.app/" target="_blank" rel="noopener noreferrer">Abrir autenticador ↗</a></div>
+      <button class="btn-txt" type="submit">Entrar</button>
+    </form>
+
+    <div id="mantenedor" class="d-none">
+    <!-- Formulario de sitio -->
+    <div class="panel mb-5">
+      <div id="titulo-form" class="etiqueta mb-3">Nuevo sitio</div>
+      <form id="form" autocomplete="off">
+        <div class="d-flex gap-4 align-items-center">
+          <div class="flex-grow-1">
+            <input id="f-name" class="campo mb-2" required maxlength="80" placeholder="Nombre">
+            <input id="f-url" class="campo mb-2" type="url" required placeholder="https:// sitio">
+            <input id="f-img" class="campo" type="url" placeholder="https:// logo">
+          </div>
+          <img id="f-preview" class="preview" alt="">
+        </div>
+        <div class="d-flex gap-2 mt-4">
+          <button class="btn-txt" type="submit" id="btn-form">Agregar</button>
+          <button class="btn-txt d-none" type="button" id="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Lista -->
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <div class="etiqueta">Sitios <span id="total"></span></div>
+      <button class="btn-txt" id="btn-guardar" disabled>Guardar</button>
+    </div>
+    <div id="lista"></div>
+    <div class="text-center mt-5"><a href="#" id="btn-salir">Cerrar sesión</a></div>
+    </div>
+  </div>
+
+  <div id="aviso" class="d-none"></div>
+
+  <script>
+    let sitios = [];
+    let editando = -1;
+    let cambios = false;
+
+    const $ = id => document.getElementById(id);
+
+    function avisar(texto, error = false) {
+      const a = $('aviso');
+      a.textContent = texto;
+      a.className = error ? 'error' : '';
+      clearTimeout(avisar.t);
+      avisar.t = setTimeout(() => a.classList.add('d-none'), error ? 6000 : 2500);
+    }
+
+    function marcarCambios(valor) {
+      cambios = valor;
+      $('btn-guardar').disabled = !valor;
+    }
+
+    function pintar() {
+      const lista = $('lista');
+      lista.innerHTML = '';
+      $('total').textContent = `· ${sitios.length}`;
+      sitios.forEach((s, i) => {
+        const fila = document.createElement('div');
+        fila.className = 'fila' + (i === editando ? ' activa' : '');
+        fila.innerHTML = `
+          <img class="mini" alt="">
+          <div class="datos">
+            <div></div>
+            <small></small>
+          </div>
+          <div class="acciones">
+            <button class="btn-icono" data-acc="subir" title="Subir">↑</button>
+            <button class="btn-icono" data-acc="bajar" title="Bajar">↓</button>
+            <button class="btn-icono" data-acc="editar" title="Editar">✎</button>
+            <button class="btn-icono peligro" data-acc="borrar" title="Eliminar">✕</button>
+          </div>`;
+        if (s.img) fila.querySelector('img').src = s.img;
+        fila.querySelector('.datos div').textContent = s.name;
+        fila.querySelector('small').textContent = s.url;
+        fila.querySelectorAll('button').forEach(b => b.onclick = () => accion(b.dataset.acc, i));
+        lista.appendChild(fila);
+      });
+    }
+
+    function accion(acc, i) {
+      if (acc === 'subir' && i > 0) [sitios[i - 1], sitios[i]] = [sitios[i], sitios[i - 1]];
+      else if (acc === 'bajar' && i < sitios.length - 1) [sitios[i + 1], sitios[i]] = [sitios[i], sitios[i + 1]];
+      else if (acc === 'editar') return editar(i);
+      else if (acc === 'borrar') {
+        if (!confirm(`¿Eliminar "${sitios[i].name}"?`)) return;
+        sitios.splice(i, 1);
+        if (editando === i) limpiarForm();
+      } else return;
+      marcarCambios(true);
+      pintar();
+    }
+
+    function editar(i) {
+      editando = i;
+      $('f-name').value = sitios[i].name;
+      $('f-url').value = sitios[i].url;
+      $('f-img').value = sitios[i].img;
+      if (sitios[i].img) $('f-preview').src = sitios[i].img;
+      $('titulo-form').textContent = 'Editar sitio';
+      $('btn-form').textContent = 'Actualizar';
+      $('btn-cancelar').classList.remove('d-none');
+      pintar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function limpiarForm() {
+      editando = -1;
+      $('form').reset();
+      $('f-preview').removeAttribute('src');
+      $('titulo-form').textContent = 'Nuevo sitio';
+      $('btn-form').textContent = 'Agregar';
+      $('btn-cancelar').classList.add('d-none');
+      pintar();
+    }
+
+    $('f-img').oninput = e => {
+      if (e.target.value) $('f-preview').src = e.target.value;
+      else $('f-preview').removeAttribute('src');
+    };
+    $('btn-cancelar').onclick = limpiarForm;
+
+    $('form').onsubmit = e => {
+      e.preventDefault();
+      const sitio = { name: $('f-name').value.trim(), url: $('f-url').value.trim(), img: $('f-img').value.trim() };
+      if (editando >= 0) sitios[editando] = sitio;
+      else sitios.push(sitio);
+      marcarCambios(true);
+      limpiarForm();
+    };
+
+    // Sesión: token firmado por el servidor tras validar el código TOTP
+    const leerToken = () => { try { return sessionStorage.getItem('token-admin'); } catch (e) { return null; } };
+    const escribirToken = t => { try { t ? sessionStorage.setItem('token-admin', t) : sessionStorage.removeItem('token-admin'); } catch (e) {} };
+
+    function mostrar(logueado) {
+      $('login').classList.toggle('d-none', logueado);
+      $('mantenedor').classList.toggle('d-none', !logueado);
+      if (!logueado) $('f-codigo').focus();
+    }
+
+    $('login').onsubmit = async e => {
+      e.preventDefault();
+      try {
+        const r = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ codigo: $('f-codigo').value.trim() })
+        });
+        const datos = await r.json();
+        if (!r.ok) throw new Error(datos.error || `Error ${r.status}`);
+        escribirToken(datos.token);
+        $('f-codigo').value = '';
+        mostrar(true);
+        cargar();
+      } catch (err) {
+        $('f-codigo').select();
+        avisar(err.message, true);
+      }
+    };
+
+    $('btn-salir').onclick = e => {
+      e.preventDefault();
+      escribirToken(null);
+      mostrar(false);
+    };
+
+    $('btn-guardar').onclick = async () => {
+      $('btn-guardar').disabled = true;
+      try {
+        const r = await fetch('/api/sitios', {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${leerToken()}` },
+          body: JSON.stringify(sitios)
+        });
+        const datos = await r.json();
+        if (r.status === 401) {
+          // Se conservan los cambios en memoria: al volver a entrar se pueden guardar
+          escribirToken(null);
+          mostrar(false);
+        }
+        if (!r.ok) throw new Error(datos.error || `Error ${r.status}`);
+        sitios = datos;
+        marcarCambios(false);
+        pintar();
+        avisar('Guardado');
+      } catch (err) {
+        marcarCambios(true);
+        avisar(`No se pudo guardar: ${err.message}`, true);
+      }
+    };
+
+    window.onbeforeunload = e => { if (cambios) e.preventDefault(); };
+
+    // Carga la lista solo la primera vez, para no perder cambios sin guardar
+    async function cargar() {
+      if (cargar.listo) return;
+      try {
+        const r = await fetch('/api/sitios', { cache: 'no-store' });
+        if (!r.ok) throw new Error(`Error ${r.status}`);
+        sitios = await r.json();
+        cargar.listo = true;
+        pintar();
+      } catch (err) {
+        avisar(`No se pudo cargar la lista (${err.message}). Usa "netlify dev".`, true);
+      }
+    }
+
+    if (leerToken()) {
+      mostrar(true);
+      cargar();
+    } else {
+      mostrar(false);
+    }
+  </script>
+</body>
+</html>

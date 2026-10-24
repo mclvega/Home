@@ -50,3 +50,11 @@ Ejemplo:
 ## Nota
 
 La página está pensada como una herramienta personal de acceso rápido y puede adaptarse fácilmente a tus sitios favoritos.
+
+## Mantenedor
+
+- `admin.html`: agrega, edita, elimina y ordena los sitios. Se entra con el código de 6 cifras de https://mcl-autenticator-code.netlify.app.
+- Los sitios se guardan en Netlify Blobs mediante `netlify/functions/sitios.mjs` (`/api/sitios` y `/api/login`). `sitios.json` es la lista inicial y de respaldo.
+- La clave TOTP va en la variable `TOTP_SECRET` (en Netlify y en `.env` local; ver `.env.example`).
+- Local: `netlify dev --port 4200` o el launch de VS Code.
+
