@@ -82,6 +82,18 @@
       border-color: var(--texto);
     }
 
+    /* Botón solo ícono */
+    .btn-txt.icono {
+      width: 2.6rem;
+      height: 2.6rem;
+      padding: 0;
+      font-size: 1.15rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .btn-txt:disabled {
       opacity: .25;
       pointer-events: none;
@@ -231,15 +243,17 @@
   <div class="container-fluid px-3 px-md-5 py-5">
     <div class="d-flex align-items-baseline justify-content-between mb-5">
       <h1 class="m-0">McL</h1>
-      <a href="index.html">← home</a>
+      <a href="index.html" class="btn-txt icono" title="Volver al home" aria-label="Volver al home">⌂</a>
     </div>
 
     <!-- Acceso con código de mcl-autenticator-code -->
     <form id="login" class="panel text-center d-none mx-auto" style="max-width: 360px" autocomplete="off">
       <div class="etiqueta mb-3">Código de acceso</div>
       <input id="f-codigo" class="campo text-center fs-2 mb-3" inputmode="numeric" pattern="\d{6}" maxlength="6" required placeholder="000000" style="letter-spacing: .4em">
-      <div class="mb-4"><a href="https://mcl-autenticator-code.netlify.app/" target="_blank" rel="noopener noreferrer">Abrir autenticador ↗</a></div>
-      <button class="btn-txt" type="submit">Entrar</button>
+      <div class="d-flex justify-content-center gap-2">
+        <a href="https://mcl-autenticator-code.netlify.app/" target="_blank" rel="noopener noreferrer" class="btn-txt icono" title="Abrir autenticador" aria-label="Abrir autenticador">↗</a>
+        <button class="btn-txt icono" type="submit" title="Entrar" aria-label="Entrar">→</button>
+      </div>
     </form>
 
     <div id="mantenedor" class="d-none">
@@ -254,8 +268,8 @@
           <div class="col-12 col-md-1 text-center"><img id="f-preview" class="preview" alt=""></div>
         </div>
         <div class="d-flex gap-2 mt-3">
-          <button class="btn-txt" type="submit" id="btn-form">Agregar</button>
-          <button class="btn-txt d-none" type="button" id="btn-cancelar">Cancelar</button>
+          <button class="btn-txt icono" type="submit" id="btn-form" title="Agregar" aria-label="Agregar">+</button>
+          <button class="btn-txt icono d-none" type="button" id="btn-cancelar" title="Cancelar" aria-label="Cancelar">✕</button>
         </div>
       </form>
     </div>
@@ -265,14 +279,14 @@
       <div class="etiqueta">Sitios <span id="total"></span></div>
       <input id="filtro-texto" class="campo flex-grow-1" style="max-width: 320px" type="search" placeholder="Buscar por nombre o URL">
       <div class="d-flex flex-wrap gap-2" id="chips">
-        <button class="chip activo" data-filtro="todos">Todos</button>
-        <button class="chip" data-filtro="sin-logo">Sin logo</button>
-        <button class="chip" data-filtro="http">Sin https</button>
+        <button class="chip activo" data-filtro="todos" title="Todos" aria-label="Todos">∗</button>
+        <button class="chip" data-filtro="sin-logo" title="Sin logo" aria-label="Sin logo">◌</button>
+        <button class="chip" data-filtro="http" title="Sin https" aria-label="Sin https">⚠</button>
       </div>
-      <button class="btn-txt ms-auto" id="btn-guardar" disabled>Guardar</button>
+      <button class="btn-txt icono ms-auto" id="btn-guardar" disabled title="Guardar cambios" aria-label="Guardar cambios">⤒</button>
     </div>
     <div id="lista"></div>
-    <div class="text-center mt-5"><a href="#" id="btn-salir">Cerrar sesión</a></div>
+    <div class="text-center mt-5"><a href="#" id="btn-salir" class="btn-txt icono" title="Cerrar sesión" aria-label="Cerrar sesión">⏻</a></div>
     </div>
   </div>
 
@@ -284,6 +298,12 @@
     let cambios = false;
 
     const $ = id => document.getElementById(id);
+
+    function icono(boton, simbolo, texto) {
+      boton.textContent = simbolo;
+      boton.title = texto;
+      boton.setAttribute('aria-label', texto);
+    }
 
     function avisar(texto, error = false) {
       const a = $('aviso');
@@ -372,7 +392,7 @@
       $('f-img').value = sitios[i].img;
       if (sitios[i].img) $('f-preview').src = sitios[i].img;
       $('titulo-form').textContent = 'Editar sitio';
-      $('btn-form').textContent = 'Actualizar';
+      icono($('btn-form'), '✓', 'Actualizar');
       $('btn-cancelar').classList.remove('d-none');
       pintar();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -383,7 +403,7 @@
       $('form').reset();
       $('f-preview').removeAttribute('src');
       $('titulo-form').textContent = 'Nuevo sitio';
-      $('btn-form').textContent = 'Agregar';
+      icono($('btn-form'), '+', 'Agregar');
       $('btn-cancelar').classList.add('d-none');
       pintar();
     }
