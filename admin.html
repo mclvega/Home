@@ -121,41 +121,91 @@
       visibility: hidden;
     }
 
-    .fila {
-      display: flex;
-      align-items: center;
+    /* Grilla de sitios: ocupa todo el ancho */
+    #lista {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
       gap: 1rem;
-      padding: .75rem 0;
-      border-bottom: 1px solid var(--borde);
     }
 
-    .fila.activa {
-      opacity: .4;
+    .tarjeta {
+      position: relative;
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 1.25rem .75rem .5rem;
+      text-align: center;
+      transition: border-color .2s;
+    }
+
+    .tarjeta:hover {
+      border-color: #444;
+    }
+
+    .tarjeta.activa {
+      border-color: var(--texto);
+    }
+
+    .tarjeta .pos {
+      position: absolute;
+      top: .5rem;
+      left: .75rem;
+      font-size: .7rem;
+      color: #444;
     }
 
     .mini {
-      width: 36px;
-      height: 36px;
+      width: 64px;
+      height: 64px;
       object-fit: contain;
-      flex-shrink: 0;
+      margin-bottom: .75rem;
     }
 
-    .datos {
-      flex-grow: 1;
-      min-width: 0;
-    }
-
-    .datos small {
-      color: var(--tenue);
-      display: block;
+    .tarjeta .nombre {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
+    .tarjeta small {
+      color: var(--tenue);
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: .75rem;
+    }
+
     .acciones {
       display: flex;
-      flex-shrink: 0;
+      justify-content: center;
+      margin-top: .5rem;
+    }
+
+    .btn-icono:disabled {
+      opacity: .2;
+      pointer-events: none;
+    }
+
+    /* Filtros */
+    .chip {
+      background: transparent;
+      border: 1px solid var(--borde);
+      color: var(--tenue);
+      border-radius: 999px;
+      padding: .2rem .8rem;
+      font-size: .8rem;
+    }
+
+    .chip.activo {
+      border-color: var(--texto);
+      color: var(--texto);
+    }
+
+    .vacio {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--tenue);
+      padding: 3rem 0;
     }
 
     #aviso {
@@ -178,14 +228,14 @@
   </style>
 </head>
 <body>
-  <div class="container py-5" style="max-width: 680px">
+  <div class="container-fluid px-3 px-md-5 py-5">
     <div class="d-flex align-items-baseline justify-content-between mb-5">
       <h1 class="m-0">McL</h1>
       <a href="index.html">← home</a>
     </div>
 
     <!-- Acceso con código de mcl-autenticator-code -->
-    <form id="login" class="panel text-center d-none" autocomplete="off">
+    <form id="login" class="panel text-center d-none mx-auto" style="max-width: 360px" autocomplete="off">
       <div class="etiqueta mb-3">Código de acceso</div>
       <input id="f-codigo" class="campo text-center fs-2 mb-3" inputmode="numeric" pattern="\d{6}" maxlength="6" required placeholder="000000" style="letter-spacing: .4em">
       <div class="mb-4"><a href="https://mcl-autenticator-code.netlify.app/" target="_blank" rel="noopener noreferrer">Abrir autenticador ↗</a></div>
@@ -197,15 +247,13 @@
     <div class="panel mb-5">
       <div id="titulo-form" class="etiqueta mb-3">Nuevo sitio</div>
       <form id="form" autocomplete="off">
-        <div class="d-flex gap-4 align-items-center">
-          <div class="flex-grow-1">
-            <input id="f-name" class="campo mb-2" required maxlength="80" placeholder="Nombre">
-            <input id="f-url" class="campo mb-2" type="url" required placeholder="https:// sitio">
-            <input id="f-img" class="campo" type="url" placeholder="https:// logo">
-          </div>
-          <img id="f-preview" class="preview" alt="">
+        <div class="row g-3 align-items-center">
+          <div class="col-12 col-md-3"><input id="f-name" class="campo" required maxlength="80" placeholder="Nombre"></div>
+          <div class="col-12 col-md-4"><input id="f-url" class="campo" type="url" required placeholder="https:// sitio"></div>
+          <div class="col-12 col-md-4"><input id="f-img" class="campo" type="url" placeholder="https:// logo"></div>
+          <div class="col-12 col-md-1 text-center"><img id="f-preview" class="preview" alt=""></div>
         </div>
-        <div class="d-flex gap-2 mt-4">
+        <div class="d-flex gap-2 mt-3">
           <button class="btn-txt" type="submit" id="btn-form">Agregar</button>
           <button class="btn-txt d-none" type="button" id="btn-cancelar">Cancelar</button>
         </div>
@@ -213,9 +261,15 @@
     </div>
 
     <!-- Lista -->
-    <div class="d-flex align-items-center justify-content-between mb-2">
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
       <div class="etiqueta">Sitios <span id="total"></span></div>
-      <button class="btn-txt" id="btn-guardar" disabled>Guardar</button>
+      <input id="filtro-texto" class="campo flex-grow-1" style="max-width: 320px" type="search" placeholder="Buscar por nombre o URL">
+      <div class="d-flex flex-wrap gap-2" id="chips">
+        <button class="chip activo" data-filtro="todos">Todos</button>
+        <button class="chip" data-filtro="sin-logo">Sin logo</button>
+        <button class="chip" data-filtro="http">Sin https</button>
+      </div>
+      <button class="btn-txt ms-auto" id="btn-guardar" disabled>Guardar</button>
     </div>
     <div id="lista"></div>
     <div class="text-center mt-5"><a href="#" id="btn-salir">Cerrar sesión</a></div>
@@ -244,32 +298,59 @@
       $('btn-guardar').disabled = !valor;
     }
 
+    let filtro = 'todos';
+
+    const dominio = url => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return url; } };
+
+    function pasaFiltro(s) {
+      const texto = $('filtro-texto').value.trim().toLowerCase();
+      if (texto && !`${s.name} ${s.url}`.toLowerCase().includes(texto)) return false;
+      if (filtro === 'sin-logo') return !s.img;
+      if (filtro === 'http') return /^http:/i.test(s.url) || /^http:/i.test(s.img);
+      return true;
+    }
+
     function pintar() {
       const lista = $('lista');
       lista.innerHTML = '';
-      $('total').textContent = `· ${sitios.length}`;
-      sitios.forEach((s, i) => {
-        const fila = document.createElement('div');
-        fila.className = 'fila' + (i === editando ? ' activa' : '');
-        fila.innerHTML = `
+      const visibles = sitios.map((s, i) => [s, i]).filter(([s]) => pasaFiltro(s));
+      // Ordenar solo tiene sentido viendo la lista completa
+      const filtrando = visibles.length !== sitios.length;
+      $('total').textContent = filtrando ? `· ${visibles.length} de ${sitios.length}` : `· ${sitios.length}`;
+      if (!visibles.length) lista.innerHTML = '<div class="vacio">Sin resultados</div>';
+      visibles.forEach(([s, i]) => {
+        const tarjeta = document.createElement('div');
+        tarjeta.className = 'tarjeta' + (i === editando ? ' activa' : '');
+        tarjeta.innerHTML = `
+          <span class="pos"></span>
           <img class="mini" alt="">
-          <div class="datos">
-            <div></div>
-            <small></small>
-          </div>
+          <div class="nombre"></div>
+          <small></small>
           <div class="acciones">
-            <button class="btn-icono" data-acc="subir" title="Subir">↑</button>
-            <button class="btn-icono" data-acc="bajar" title="Bajar">↓</button>
+            <button class="btn-icono" data-acc="subir" title="Mover antes">←</button>
             <button class="btn-icono" data-acc="editar" title="Editar">✎</button>
             <button class="btn-icono peligro" data-acc="borrar" title="Eliminar">✕</button>
+            <button class="btn-icono" data-acc="bajar" title="Mover después">→</button>
           </div>`;
-        if (s.img) fila.querySelector('img').src = s.img;
-        fila.querySelector('.datos div').textContent = s.name;
-        fila.querySelector('small').textContent = s.url;
-        fila.querySelectorAll('button').forEach(b => b.onclick = () => accion(b.dataset.acc, i));
-        lista.appendChild(fila);
+        tarjeta.querySelector('.pos').textContent = i + 1;
+        if (s.img) tarjeta.querySelector('img').src = s.img;
+        tarjeta.querySelector('.nombre').textContent = s.name;
+        tarjeta.querySelector('small').textContent = dominio(s.url);
+        tarjeta.title = s.url;
+        tarjeta.querySelectorAll('button').forEach(b => {
+          if (filtrando && (b.dataset.acc === 'subir' || b.dataset.acc === 'bajar')) b.disabled = true;
+          b.onclick = () => accion(b.dataset.acc, i);
+        });
+        lista.appendChild(tarjeta);
       });
     }
+
+    $('filtro-texto').oninput = pintar;
+    document.querySelectorAll('#chips .chip').forEach(c => c.onclick = () => {
+      filtro = c.dataset.filtro;
+      document.querySelectorAll('#chips .chip').forEach(x => x.classList.toggle('activo', x === c));
+      pintar();
+    });
 
     function accion(acc, i) {
       if (acc === 'subir' && i > 0) [sitios[i - 1], sitios[i]] = [sitios[i], sitios[i - 1]];

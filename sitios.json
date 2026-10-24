@@ -148,5 +148,10 @@
     "name": "Directv Go",
     "url": "https://www.directvgo.com/home/main",
     "img": "https://upload.wikimedia.org/wikipedia/commons/5/50/DGO-logo.png"
+  },
+  {
+    "name": "Autenticator",
+    "url": "https://mcl-autenticator-code.netlify.app/",
+    "img": "https://mcl-autenticator-code.netlify.app/icon-192.png"
   }
 ]
