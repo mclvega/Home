@@ -157,6 +157,16 @@
       border-color: var(--texto);
     }
 
+    .tarjeta.arrastrable {
+      cursor: grab;
+      touch-action: pan-y;
+    }
+
+    .tarjeta.fantasma {
+      opacity: .3;
+      border-style: dashed;
+    }
+
     .tarjeta .pos {
       position: absolute;
       top: .5rem;
@@ -292,6 +302,7 @@
 
   <div id="aviso" class="d-none"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
   <script>
     let sitios = [];
     let editando = -1;
@@ -347,23 +358,42 @@
           <div class="nombre"></div>
           <small></small>
           <div class="acciones">
-            <button class="btn-icono" data-acc="subir" title="Mover antes">←</button>
             <button class="btn-icono" data-acc="editar" title="Editar">✎</button>
             <button class="btn-icono peligro" data-acc="borrar" title="Eliminar">✕</button>
-            <button class="btn-icono" data-acc="bajar" title="Mover después">→</button>
           </div>`;
+        tarjeta.dataset.i = i;
+        tarjeta.classList.toggle('arrastrable', !filtrando);
         tarjeta.querySelector('.pos').textContent = i + 1;
         if (s.img) tarjeta.querySelector('img').src = s.img;
         tarjeta.querySelector('.nombre').textContent = s.name;
         tarjeta.querySelector('small').textContent = dominio(s.url);
         tarjeta.title = s.url;
-        tarjeta.querySelectorAll('button').forEach(b => {
-          if (filtrando && (b.dataset.acc === 'subir' || b.dataset.acc === 'bajar')) b.disabled = true;
-          b.onclick = () => accion(b.dataset.acc, i);
-        });
+        tarjeta.querySelectorAll('button').forEach(b => b.onclick = () => accion(b.dataset.acc, i));
         lista.appendChild(tarjeta);
       });
+      ordenable.option('disabled', filtrando);
     }
+
+    // Ordenar arrastrando (mouse y táctil); se desactiva mientras hay un filtro
+    const ordenable = Sortable.create($('lista'), {
+      animation: 150,
+      draggable: '.tarjeta',
+      filter: 'button',
+      preventOnFilter: false,
+      delay: 150,
+      delayOnTouchOnly: true,
+      ghostClass: 'fantasma',
+      onEnd: e => {
+        if (e.oldIndex === e.newIndex) return;
+        const [movido] = sitios.splice(e.oldIndex, 1);
+        sitios.splice(e.newIndex, 0, movido);
+        if (editando === e.oldIndex) editando = e.newIndex;
+        else if (editando > e.oldIndex && editando <= e.newIndex) editando--;
+        else if (editando < e.oldIndex && editando >= e.newIndex) editando++;
+        marcarCambios(true);
+        pintar();
+      }
+    });
 
     $('filtro-texto').oninput = pintar;
     document.querySelectorAll('#chips .chip').forEach(c => c.onclick = () => {
@@ -373,9 +403,7 @@
     });
 
     function accion(acc, i) {
-      if (acc === 'subir' && i > 0) [sitios[i - 1], sitios[i]] = [sitios[i], sitios[i - 1]];
-      else if (acc === 'bajar' && i < sitios.length - 1) [sitios[i + 1], sitios[i]] = [sitios[i], sitios[i + 1]];
-      else if (acc === 'editar') return editar(i);
+      if (acc === 'editar') return editar(i);
       else if (acc === 'borrar') {
         if (!confirm(`¿Eliminar "${sitios[i].name}"?`)) return;
         sitios.splice(i, 1);
