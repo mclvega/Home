@@ -79,7 +79,8 @@ function normalizar(lista) {
 }
 
 export default async (req) => {
-  const store = getStore("home");
+  // Lectura fuerte: sin ella, un GET justo después de guardar puede devolver la lista anterior
+  const store = getStore({ name: "home", consistency: "strong" });
   const secreto = Netlify.env.get("TOTP_SECRET");
   const ruta = new URL(req.url).pathname;
 

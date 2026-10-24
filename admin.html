@@ -293,7 +293,7 @@
         <button class="chip" data-filtro="sin-logo" title="Sin logo" aria-label="Sin logo">◌</button>
         <button class="chip" data-filtro="http" title="Sin https" aria-label="Sin https">⚠</button>
       </div>
-      <button class="btn-txt icono ms-auto" id="btn-guardar" disabled title="Guardar cambios" aria-label="Guardar cambios">⤒</button>
+      <button class="btn-txt icono ms-auto" id="btn-guardar" disabled title="Guardado" aria-label="Guardado">✓</button>
     </div>
     <div id="lista"></div>
     <div class="text-center mt-5"><a href="#" id="btn-salir" class="btn-txt icono" title="Cerrar sesión" aria-label="Cerrar sesión">⏻</a></div>
@@ -324,9 +324,22 @@
       avisar.t = setTimeout(() => a.classList.add('d-none'), error ? 6000 : 2500);
     }
 
+    // Estado del guardado en el botón: ● pendiente, … guardando, ✓ guardado, ! error
+    function estado(simbolo, texto) {
+      icono($('btn-guardar'), simbolo, texto);
+      $('btn-guardar').disabled = simbolo === '✓' || simbolo === '…';
+    }
+
+    // Cada cambio se guarda solo, un segundo después del último
+    let version = 0;
+    let temporizador = null;
     function marcarCambios(valor) {
       cambios = valor;
-      $('btn-guardar').disabled = !valor;
+      if (!valor) return;
+      version++;
+      estado('●', 'Cambios sin guardar · guardar ahora');
+      clearTimeout(temporizador);
+      temporizador = setTimeout(guardar, 1000);
     }
 
     let filtro = 'todos';
@@ -475,6 +488,7 @@
         $('f-codigo').value = '';
         mostrar(true);
         cargar();
+        if (cambios) guardar();
       } catch (err) {
         $('f-codigo').select();
         avisar(err.message, true);
@@ -487,8 +501,17 @@
       mostrar(false);
     };
 
-    $('btn-guardar').onclick = async () => {
-      $('btn-guardar').disabled = true;
+    let guardando = false;
+    async function guardar() {
+      clearTimeout(temporizador);
+      if (!cambios) return;
+      if (guardando) {
+        temporizador = setTimeout(guardar, 500);
+        return;
+      }
+      guardando = true;
+      const enviada = version;
+      estado('…', 'Guardando');
       try {
         const r = await fetch('/api/sitios', {
           method: 'PUT',
@@ -497,20 +520,29 @@
         });
         const datos = await r.json();
         if (r.status === 401) {
-          // Se conservan los cambios en memoria: al volver a entrar se pueden guardar
+          // Se conservan los cambios en memoria: se guardan al volver a entrar
           escribirToken(null);
           mostrar(false);
         }
         if (!r.ok) throw new Error(datos.error || `Error ${r.status}`);
-        sitios = datos;
-        marcarCambios(false);
-        pintar();
-        avisar('Guardado');
+        // Si hubo más cambios mientras se guardaba, quedan pendientes para el siguiente guardado
+        if (version === enviada) {
+          cambios = false;
+          estado('✓', 'Guardado');
+        } else {
+          estado('●', 'Cambios sin guardar · guardar ahora');
+          temporizador = setTimeout(guardar, 1000);
+        }
       } catch (err) {
-        marcarCambios(true);
+        estado('!', `No se pudo guardar: ${err.message} · reintentar`);
+        $('btn-guardar').disabled = false;
         avisar(`No se pudo guardar: ${err.message}`, true);
+      } finally {
+        guardando = false;
       }
-    };
+    }
+
+    $('btn-guardar').onclick = guardar;
 
     window.onbeforeunload = e => { if (cambios) e.preventDefault(); };
 
