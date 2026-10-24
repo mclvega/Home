@@ -1,6 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { getStore } from "@netlify/blobs";
-import inicial from "../../sitios.json" with { type: "json" };
 
 // Lista de sitios del home guardada en Netlify Blobs.
 // GET /api/sitios: público.
@@ -94,7 +93,7 @@ export default async (req) => {
 
   if (req.method === "GET") {
     const guardada = await store.get(CLAVE_BLOB, { type: "json" });
-    return json(guardada ?? inicial);
+    return json(guardada ?? []);
   }
 
   if (req.method === "PUT") {

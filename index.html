@@ -39,7 +39,7 @@
     <div id="hora" class="position-absolute top-0 end-0 m-3 fs-1"></div>
 
     <div class="container text-center mt-4 fs-1">
-      <h1 class="display-1">McL</h1>
+      <h1 class="display-1"><a href="admin.html" class="text-secondary fs-3 align-middle me-3" title="Mantenedor de sitios">⚙</a>McL</h1>
     </div>
 
     <div class="container mt-5">
@@ -47,9 +47,7 @@
     </div>
 
     <footer class="text-center mt-5 fs-5">
-      <div id="footer"> <h6></h6></div>
-      <a href="admin.html" class="text-secondary fs-6" title="Mantenedor de sitios">⚙ Mantenedor</a>
-    </footer>
+      <div id="footer"> <h6></h6></div>    </footer>
 
 
     <script>
@@ -61,14 +59,12 @@
         setTimeout(mostrarHora, 1000);
       }
 
-      // Lee los sitios desde el mantenedor (/api/sitios); si falla, usa sitios.json
+      // Lee los sitios desde el mantenedor (Netlify Blobs vía /api/sitios)
       async function obtenerSitios() {
-        for (const url of ['/api/sitios', 'sitios.json']) {
-          try {
-            const r = await fetch(url, { cache: 'no-store' });
-            if (r.ok) return await r.json();
-          } catch (e) {}
-        }
+        try {
+          const r = await fetch('/api/sitios', { cache: 'no-store' });
+          if (r.ok) return await r.json();
+        } catch (e) {}
         return [];
       }
 

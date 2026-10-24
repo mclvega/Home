@@ -21,7 +21,7 @@ Incluye:
 
 1. Abre `index.html` en tu navegador.
 2. Haz clic en cualquiera de los íconos para abrir el sitio correspondiente.
-3. Si deseas personalizar los accesos, edita el JSON embebido dentro de `index.html`.
+3. Para agregar, editar u ordenar los accesos, usa el ⚙ junto al nombre (mantenedor).
 
 ## Personalización
 
@@ -54,7 +54,7 @@ La página está pensada como una herramienta personal de acceso rápido y puede
 ## Mantenedor
 
 - `admin.html`: agrega, edita, elimina y ordena los sitios. Se entra con el código de 6 cifras de https://mcl-autenticator-code.netlify.app.
-- Los sitios se guardan en Netlify Blobs mediante `netlify/functions/sitios.mjs` (`/api/sitios` y `/api/login`). `sitios.json` es la lista inicial y de respaldo.
+- Los sitios se guardan en Netlify Blobs mediante `netlify/functions/sitios.mjs` (`/api/sitios` y `/api/login`).
 - La clave TOTP va en la variable `TOTP_SECRET` (en Netlify y en `.env` local; ver `.env.example`).
 - Local: `netlify dev --port 4200` o el launch de VS Code.
 
